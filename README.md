@@ -13,8 +13,7 @@ Este repositório contém o código-fonte de uma aplicação em Python para gere
 - [Gerando o Executável (.exe)](#gerando-o-executável-exe)
   - [Passos para Gerar o Executável](#passos-para-gerar-o-executável)
 - [Estrutura do Projeto](#estrutura-do-projeto)
-- [Contribuição](#contribuição)
-- [Licença](#licença)
+- [Contribuição](#contribuição)=
 
 ---
 
