@@ -84,7 +84,7 @@ O projeto segue um padrão modularizado:
    python -m venv venv
    ```
    Ative o ambiente virtual:
-   - **Linux/macOS**: `source venv/bin/activate`
+
    - **Windows**: `venv\Scripts\activate`
 
 3. Instale as dependências:
