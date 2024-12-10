@@ -5,16 +5,19 @@ import sys
 import re
 import logging
 
-# Determinar o caminho da aplicação, considerando se está sendo executada como executável ou script Python
+# Determinar o caminho base da aplicação
 if getattr(sys, 'frozen', False):
     # Executando como um executável PyInstaller
-    APPLICATION_PATH = sys._MEIPASS
+    BASE_DIR = os.path.dirname(sys.executable)
+    # Caminho para recursos incluídos no executável
+    RESOURCE_PATH = sys._MEIPASS
 else:
     # Executando como script Python
-    APPLICATION_PATH = os.path.dirname(os.path.abspath(__file__))
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    RESOURCE_PATH = BASE_DIR
 
-# Definir as pastas de dados e logs
-DATA_DIR = os.path.join(APPLICATION_PATH, 'data')
+# Definir as pastas de dados e logs no diretório base
+DATA_DIR = os.path.join(BASE_DIR, 'data')
 DB_DIR = os.path.join(DATA_DIR, 'db')
 LOG_DIR = os.path.join(DATA_DIR, 'logs')
 
@@ -24,10 +27,10 @@ os.makedirs(LOG_DIR, exist_ok=True)
 
 # Caminhos para os bancos de dados
 DB_PATH = os.path.join(DB_DIR, 'packages.db')
-TEST_DB_PATH = os.path.join(DB_DIR, 'packagestest.db')  # Banco de dados para testes (menu de bipagem teste)
+TEST_DB_PATH = os.path.join(DB_DIR, 'packagestest.db')  # Banco de dados para testes
 
 # Caminho para o arquivo de áudio personalizado
-ALERT_SOUND_PATH = os.path.join(APPLICATION_PATH, 'sounds', 'alert.wav')
+ALERT_SOUND_PATH = os.path.join(RESOURCE_PATH, 'sounds', 'alert.wav')
 
 # Caminho para o arquivo de log
 LOG_PATH = os.path.join(LOG_DIR, 'app.log')
