@@ -116,7 +116,7 @@ O projeto segue um padrão modularizado:
 
 2. Gere o executável:
    ```bash
-   pyinstaller --onefile --windowed        --add-data "data/db/packages.db;data/db"        main.py
+   pyinstaller --onefile --windowed --add-data "sounds;sounds" main.py
    ```
 
 O executável estará disponível na pasta `dist/`.

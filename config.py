@@ -7,10 +7,10 @@ import logging
 
 # Determinar o caminho da aplicação, considerando se está sendo executada como executável ou script Python
 if getattr(sys, 'frozen', False):
-    # Executado como um executável criado pelo PyInstaller
-    APPLICATION_PATH = os.path.dirname(sys.executable)
+    # Executando como um executável PyInstaller
+    APPLICATION_PATH = sys._MEIPASS
 else:
-    # Executado como um script Python
+    # Executando como script Python
     APPLICATION_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # Definir as pastas de dados e logs
@@ -27,7 +27,7 @@ DB_PATH = os.path.join(DB_DIR, 'packages.db')
 TEST_DB_PATH = os.path.join(DB_DIR, 'packagestest.db')  # Banco de dados para testes (menu de bipagem teste)
 
 # Caminho para o arquivo de áudio personalizado
-ALERT_SOUND_PATH = os.path.join(APPLICATION_PATH, 'sounds', 'alert.wav')  # Ajuste conforme necessário
+ALERT_SOUND_PATH = os.path.join(APPLICATION_PATH, 'sounds', 'alert.wav')
 
 # Caminho para o arquivo de log
 LOG_PATH = os.path.join(LOG_DIR, 'app.log')
