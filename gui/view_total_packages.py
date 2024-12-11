@@ -2,10 +2,12 @@
 
 import tkinter as tk
 from tkinter import ttk, messagebox
-from tkcalendar import DateEntry
+import datetime
 import logging
+from tkcalendar import DateEntry  # Certifique-se de instalar o tkcalendar com 'pip install tkcalendar'
 
 from utils import center_window
+from config import logging
 
 class ViewTotalPackagesWindow:
     """
@@ -13,130 +15,196 @@ class ViewTotalPackagesWindow:
     """
     def __init__(self, parent_app):
         self.parent_app = parent_app
-        self.app = parent_app  # Referência correta para acessar atributos de PackageCounterApp
+        self.conn = parent_app.conn
+        self.cursor = self.conn.cursor()
 
-        view_window = tk.Toplevel(self.app.root)
-        view_window.transient(self.app.root)
-        view_window.grab_set()
-        view_window.title("Consultar Coletas Anteriores")
-        view_window.geometry("800x600")
+        # Configuração da janela
+        self.window = tk.Toplevel(self.parent_app.root)
+        self.window.title("Consultar Coletas Anteriores")
+        self.window.geometry("900x700")  # Aumentar o tamanho da janela para melhor acomodação
+        self.window.resizable(True, True)  # Permitir redimensionamento
+        center_window(self.window)  # Centralizar a janela
 
-        # Frame principal da nova janela
-        view_frame = tk.Frame(view_window, bg="#f0f0f0")
-        view_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        # Frame principal
+        main_frame = tk.Frame(self.window, bg="#f0f0f0")
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-        # Seleção de data
-        tk.Label(view_frame, text="Selecione a data:", font=("Helvetica", 18), bg="#f0f0f0").pack(pady=10)
-        date_entry = DateEntry(
-            view_frame,
-            width=20,
+        # Título da janela
+        tk.Label(
+            main_frame,
+            text="Consultar Coletas Anteriores",
+            font=("Helvetica", 18, "bold"),
+            bg="#f0f0f0"
+        ).pack(pady=10)
+
+        # Frame para filtros de pesquisa
+        filter_frame = tk.Frame(main_frame, bg="#f0f0f0")
+        filter_frame.pack(fill=tk.X, pady=10)
+
+        # Filtro por Data Inicial
+        tk.Label(
+            filter_frame,
+            text="Data Inicial:",
+            font=("Helvetica", 12, "bold"),
+            bg="#f0f0f0"
+        ).grid(row=0, column=0, padx=5, pady=5, sticky="w")
+
+        self.start_date_entry = DateEntry(
+            filter_frame,
+            font=("Helvetica", 12),
+            width=12,
             background='darkblue',
             foreground='white',
-            date_pattern='yyyy-MM-dd',
-            font=("Helvetica", 16)
+            borderwidth=2,
+            date_pattern='yyyy-mm-dd'
         )
-        date_entry.pack(pady=5)
+        self.start_date_entry.grid(row=0, column=1, padx=5, pady=5)
 
-        # Seleção de transportadora
-        tk.Label(view_frame, text="Transportadora:", font=("Helvetica", 18), bg="#f0f0f0").pack(pady=10)
-        transportadora_var = tk.StringVar()
-        transportadora_var.set("Todas")
-        transportadora_options = ["Todas"] + self.app.transportadoras
-        transportadora_menu = ttk.Combobox(
-            view_frame,
-            textvariable=transportadora_var,
-            values=transportadora_options,
+        # Filtro por Data Final
+        tk.Label(
+            filter_frame,
+            text="Data Final:",
+            font=("Helvetica", 12, "bold"),
+            bg="#f0f0f0"
+        ).grid(row=0, column=2, padx=5, pady=5, sticky="w")
+
+        self.end_date_entry = DateEntry(
+            filter_frame,
+            font=("Helvetica", 12),
+            width=12,
+            background='darkblue',
+            foreground='white',
+            borderwidth=2,
+            date_pattern='yyyy-mm-dd'
+        )
+        self.end_date_entry.grid(row=0, column=3, padx=5, pady=5)
+
+        # Filtro por Transportadora
+        tk.Label(
+            filter_frame,
+            text="Transportadora:",
+            font=("Helvetica", 12, "bold"),
+            bg="#f0f0f0"
+        ).grid(row=1, column=0, padx=5, pady=5, sticky="w")
+
+        self.transportadoras = ["Todas", "SHEIN", "Shopee", "Mercado Livre"]
+        self.selected_transportadora = tk.StringVar(value="Todas")
+        self.transportadora_menu = ttk.Combobox(
+            filter_frame,
+            textvariable=self.selected_transportadora,
+            values=self.transportadoras,
+            font=("Helvetica", 12),
             state="readonly",
-            font=("Helvetica", 16)
+            width=13
         )
-        transportadora_menu.pack(pady=5)
+        self.transportadora_menu.grid(row=1, column=1, padx=5, pady=5)
+        self.transportadora_menu.current(0)  # Selecionar "Todas" por padrão
 
-        # Botão para filtrar os dados
-        filter_button = tk.Button(
-            view_frame,
-            text="Filtrar",
-            command=lambda: self.filter_by_date_and_transportadora(
-                date_entry.get_date().isoformat(),
-                transportadora_var.get()
-            ),
-            font=("Helvetica", 16),
+        # Botão de Pesquisa
+        search_button = tk.Button(
+            filter_frame,
+            text="Pesquisar",
+            command=self.search_packages,
+            font=("Helvetica", 12, "bold"),
             bg="#2196F3",
-            fg="white"
+            fg="white",
+            width=12
         )
-        filter_button.pack(pady=10)
+        search_button.grid(row=1, column=3, padx=5, pady=5)
 
-        # Frame para exibir os resultados
-        self.results_frame = tk.Frame(view_frame, bg="#f0f0f0")
-        self.results_frame.pack(fill=tk.BOTH, expand=True)
+        # Frame para Treeview e Scrollbar
+        treeview_frame = tk.Frame(main_frame, bg="#f0f0f0")
+        treeview_frame.pack(fill=tk.BOTH, expand=True, pady=10)
 
-        # Centralizar a janela de visualização
-        center_window(view_window)
+        # Configuração do Treeview para exibir coletas
+        columns = ("codigo_pacote", "transportadora", "data", "hora", "status", "coleta_number")
+        self.tree = ttk.Treeview(treeview_frame, columns=columns, show='headings')
 
-    def filter_by_date_and_transportadora(self, date, transportadora):
+        # Definir cabeçalhos
+        self.tree.heading("codigo_pacote", text="Código do Pacote")
+        self.tree.heading("transportadora", text="Transportadora")
+        self.tree.heading("data", text="Data")
+        self.tree.heading("hora", text="Hora")
+        self.tree.heading("status", text="Status")
+        self.tree.heading("coleta_number", text="Número da Coleta")
+
+        # Definir largura das colunas
+        self.tree.column("codigo_pacote", width=200, anchor='center')
+        self.tree.column("transportadora", width=150, anchor='center')
+        self.tree.column("data", width=100, anchor='center')
+        self.tree.column("hora", width=80, anchor='center')
+        self.tree.column("status", width=150, anchor='center')
+        self.tree.column("coleta_number", width=150, anchor='center')
+
+        # Adicionar a Treeview
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Scrollbar vertical
+        scrollbar = ttk.Scrollbar(treeview_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.tree.configure(yscroll=scrollbar.set)
+
+        # Carregar todas as coletas inicialmente
+        self.load_all_packages()
+
+    def load_all_packages(self):
         """
-        Filtra os pacotes com base na data e transportadora selecionadas e exibe os resultados.
+        Carrega todas as coletas da transportadora selecionada sem filtros.
         """
-        # Limpar conteúdos anteriores
-        for widget in self.results_frame.winfo_children():
-            widget.destroy()
+        try:
+            self.cursor.execute("""
+                SELECT codigo_pacote, transportadora, data, hora, status, coleta_number 
+                FROM packages 
+                ORDER BY data DESC, hora DESC
+            """)
+            records = self.cursor.fetchall()
+
+            # Limpar a Treeview
+            for row in self.tree.get_children():
+                self.tree.delete(row)
+
+            # Inserir registros na Treeview
+            for row in records:
+                self.tree.insert('', tk.END, values=row)
+        except Exception as e:
+            logging.error("Erro ao carregar todas as coletas: %s", e)
+            messagebox.showerror("Erro", f"Ocorreu um erro ao carregar as coletas: {str(e)}")
+
+    def search_packages(self):
+        """
+        Pesquisa coletas com base nos filtros fornecidos.
+        """
+        start_date = self.start_date_entry.get_date().strftime('%Y-%m-%d')
+        end_date = self.end_date_entry.get_date().strftime('%Y-%m-%d')
+        transportadora = self.selected_transportadora.get()
+
+        query = """
+            SELECT codigo_pacote, transportadora, data, hora, status, coleta_number 
+            FROM packages 
+            WHERE data BETWEEN ? AND ?
+        """
+        params = [start_date, end_date]
+
+        if transportadora != "Todas":
+            query += " AND transportadora = ?"
+            params.append(transportadora)
+
+        query += " ORDER BY data DESC, hora DESC"
 
         try:
-            query = "SELECT coleta_number, COUNT(*) FROM packages WHERE data = ?"
-            params = [date]
+            self.cursor.execute(query, tuple(params))
+            records = self.cursor.fetchall()
 
-            if transportadora != "Todas":
-                query += " AND transportadora = ?"
-                params.append(transportadora)
+            # Limpar a Treeview
+            for row in self.tree.get_children():
+                self.tree.delete(row)
 
-            query += " GROUP BY coleta_number ORDER BY coleta_number ASC"
+            # Inserir registros na Treeview
+            for row in records:
+                self.tree.insert('', tk.END, values=row)
 
-            self.app.cursor.execute(query, params)
-            results = self.app.cursor.fetchall()
-            if results:
-                tk.Label(
-                    self.results_frame,
-                    text=f"Resultados para {date}:",
-                    font=("Helvetica", 18, "bold"),
-                    bg="#f0f0f0"
-                ).pack(pady=10)
-
-                for coleta_number, count in results:
-                    tk.Label(
-                        self.results_frame,
-                        text=f"Coleta {coleta_number}: {count} pacotes",
-                        font=("Helvetica", 16),
-                        bg="#f0f0f0"
-                    ).pack()
-
-                columns = ("transportadora", "codigo_pacote", "hora", "coleta_number")
-                package_treeview = ttk.Treeview(self.results_frame, columns=columns, show='headings')
-                package_treeview.heading('transportadora', text='Transportadora')
-                package_treeview.heading('codigo_pacote', text='Código de Pacote')
-                package_treeview.heading('hora', text='Hora')
-                package_treeview.heading('coleta_number', text='Coleta Número')
-                package_treeview.pack(fill=tk.BOTH, expand=True, pady=10)
-
-                scrollbar = ttk.Scrollbar(package_treeview, orient=tk.VERTICAL, command=package_treeview.yview)
-                scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-                package_treeview.configure(yscroll=scrollbar.set)
-
-                query = "SELECT transportadora, codigo_pacote, hora, coleta_number FROM packages WHERE data = ?"
-                params = [date]
-                if transportadora != "Todas":
-                    query += " AND transportadora = ?"
-                    params.append(transportadora)
-
-                self.app.cursor.execute(query, params)
-                package_details = self.app.cursor.fetchall()
-                for transportadora_result, codigo_pacote, hora, coleta_number in package_details:
-                    package_treeview.insert('', 'end', values=(transportadora_result, codigo_pacote, hora, coleta_number))
-            else:
-                tk.Label(
-                    self.results_frame,
-                    text="Nenhum pacote registrado para esta data.",
-                    font=("Helvetica", 16),
-                    bg="#f0f0f0"
-                ).pack(pady=10)
+            if not records:
+                messagebox.showinfo("Informação", "Nenhuma coleta encontrada com os critérios selecionados.")
         except Exception as e:
-            logging.error("Erro ao filtrar os pacotes: %s", e)
-            messagebox.showerror("Erro", f"Ocorreu um erro ao filtrar os pacotes: {str(e)}")
+            logging.error("Erro ao pesquisar coletas: %s", e)
+            messagebox.showerror("Erro", f"Ocorreu um erro ao pesquisar as coletas: {str(e)}")
