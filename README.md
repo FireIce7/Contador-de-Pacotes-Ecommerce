@@ -1,7 +1,6 @@
-
 # Contador de Pacotes - Ponto 3D
 
-Este repositório contém um sistema de contagem de pacotes desenvolvido em Python, projetado para gerenciar fluxos logísticos de transportadoras como SHEIN, Shopee e Mercado Livre.
+Este repositório contém um sistema de contagem de pacotes desenvolvido em Python, projetado para gerenciar fluxos logísticos de transportadoras como SHEIN, Shopee e Mercado Livre. Ele evita pedidos duplicados, possibilita a conferência de quantos pedidos foram embalados e a verificação de pedidos caso algum esteja faltando.
 
 ## Índice
 - [Descrição Geral](#descrição-geral)
@@ -10,6 +9,7 @@ Este repositório contém um sistema de contagem de pacotes desenvolvido em Pyth
   - [Fechamento e Reabertura de Coletas](#fechamento-e-reabertura-de-coletas)
   - [Exportação de Dados](#exportação-de-dados)
   - [Consulta de Coletas Anteriores](#consulta-de-coletas-anteriores)
+  - [Verificação de Pedidos](#verificação-de-pedidos)
   - [Gerenciamento de Usuários](#gerenciamento-de-usuários)
 - [Arquitetura e Tecnologias](#arquitetura-e-tecnologias)
 - [Como Executar](#como-executar)
@@ -26,7 +26,7 @@ Este repositório contém um sistema de contagem de pacotes desenvolvido em Pyth
 
 ## Descrição Geral
 
-O **Contador de Pacotes - Ponto 3D** é uma solução eficiente e modularizada para registro, controle e exportação de pacotes. Ele oferece recursos como autenticação segura, gerenciamento de usuários, exportação de dados em CSV e consulta de histórico de coletas.
+O **Contador de Pacotes - Ponto 3D** é uma solução eficiente e modularizada para registro, controle e exportação de pacotes. Ele oferece recursos como autenticação segura, gerenciamento de usuários, exportação de dados em CSV, consulta de histórico de coletas e verificação de pacotes.
 
 ## Funcionalidades
 
@@ -42,6 +42,10 @@ O **Contador de Pacotes - Ponto 3D** é uma solução eficiente e modularizada p
 
 ### Consulta de Coletas Anteriores
 - Filtros avançados por data e transportadora com exibição de relatórios detalhados.
+- Interface melhorada para maior clareza e usabilidade.
+
+### Verificação de Pedidos
+- Verifica informações detalhadas de pacotes registrados, como status, transportadora e data do bip.
 
 ### Gerenciamento de Usuários
 - Adicionar, editar e remover contas de usuários com controle de permissões.
@@ -98,6 +102,7 @@ O projeto segue um padrão modularizado:
    ```bash
    python main.py
    ```
+
 2. Credenciais padrão para o primeiro login:
    - Usuário: admin
    - Senha: admin123
@@ -137,30 +142,17 @@ Contador_Pacotes/
 │       └── app.log            # Registro de eventos e erros para depuração.
 ├── gui/
 │   ├── login.py               # Tela de login, com autenticação de usuários usando bcrypt.
-│   ├── main_app.py            # Interface principal, incluindo registro de pacotes e relatórios.
+│   ├── main_app.py            # Interface principal, incluindo registro de pacotes, exportação e verificação.
 │   ├── export.py              # Tela para exportação de coletas filtradas em formato CSV.
 │   ├── user_management.py     # Tela para gerenciamento de usuários (adicionar, editar, remover).
+│   ├── verify_package.py      # Tela para verificar pedidos registrados com detalhes.
 │   └── view_total_packages.py # Tela para consultar coletas anteriores com filtros avançados.
 ├── main.py                    # Ponto de entrada da aplicação.
-├── utils.py                   # Funções utilitárias para sons, validação de pacotes e centralização de janelas.
-├── config.py                  # Configurações globais do projeto, como caminhos e constantes.
+├── utils.py                   # Funções utilitárias para sons, validação de códigos e centralização de janelas.
+├── config.py                  # Configurações globais do projeto, como constantes e diretórios.
 ├── requirements.txt           # Lista de bibliotecas necessárias para a execução.
 └── database.py                # Inicialização e conexão com o banco de dados SQLite.
 ```
-
-### Detalhes de Cada Módulo
-
-1. **main.py**: Inicia a aplicação e conecta o fluxo entre login e interface principal.
-2. **gui/login.py**: Responsável pela autenticação segura dos usuários, escondendo a janela principal até o login ser validado.
-3. **gui/main_app.py**: Gerencia as principais funcionalidades como registro de pacotes, fechamento de coletas e acesso às consultas.
-4. **gui/export.py**: Permite exportar listas de pacotes para um arquivo CSV com base em filtros escolhidos.
-5. **gui/user_management.py**: Oferece opções para criação, edição e remoção de usuários, garantindo controle de acessos.
-6. **gui/view_total_packages.py**: Exibe relatórios detalhados de coletas anteriores, incluindo filtros de data e transportadora.
-7. **utils.py**: Contém funções auxiliares como reprodução de sons, validação de códigos de pacotes e centralização de janelas.
-8. **config.py**: Define configurações do sistema, como constantes, expressões regulares e diretórios de arquivos.
-9. **database.py**: Inicializa o banco de dados, cria tabelas e índices e define conexões para uso da aplicação.
-10. **data/**: Diretório para armazenar bancos de dados e logs.
-11. **requirements.txt**: Lista de dependências para instalação automatizada.
 
 ---
 
