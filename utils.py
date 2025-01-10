@@ -1,10 +1,8 @@
-# utils.py
-
 import os
 import logging
 import winsound
 import threading
-from config import ALERT_SOUND_PATH, PACKAGE_CODE_REGEX
+from config import ALERT_SOUND_PATH, PACKAGE_CODE_REGEX, CORRECT_SOUND_PATH
 from tkinter import messagebox
 
 def detect_transportadora(codigo):
@@ -41,6 +39,12 @@ def play_sound(sound_type='error'):
                     winsound.PlaySound(sound_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
                 else:
                     winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS | winsound.SND_ASYNC)
+            # NOVO: som para bipagem correta
+            elif sound_type == 'success':
+                if os.path.exists(CORRECT_SOUND_PATH):
+                    winsound.PlaySound(CORRECT_SOUND_PATH, winsound.SND_FILENAME | winsound.SND_ASYNC)
+                else:
+                    winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS | winsound.SND_ASYNC)
         except Exception as e:
             logging.error("Erro ao tocar o som (%s): %s", sound_type, e)
 

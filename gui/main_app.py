@@ -1,5 +1,3 @@
-# gui/main_app.py
-
 import tkinter as tk
 from tkinter import messagebox, Toplevel
 from tkinter import ttk
@@ -25,49 +23,40 @@ class PackageCounterApp:
         self.current_user = current_user
         self.db_type = db_type  # 'main' ou 'test'
 
-        # Override de função caso necessário
         if override_role is not None:
             self.current_user['role'] = override_role
 
-        # Conexão com o banco de dados
         self.conn = conn or get_database_connection(test=(self.db_type == 'test'))[0]
         self.cursor = self.conn.cursor()
         self.root.title(title)
 
-        # Configuração da janela principal
         self.configure_main_window()
 
-        # Lista de transportadoras disponíveis
         self.transportadoras = ["SHEIN", "Shopee", "Mercado Livre"]
         self.transportadora_colors = {
-            "SHEIN": "#90EE90",         # Verde Claro
-            "Shopee": "#FFA500",        # Laranja
-            "Mercado Livre": "#FFFF99"  # Amarelo Claro
+            "SHEIN": "#90EE90",
+            "Shopee": "#FFA500",
+            "Mercado Livre": "#FFFF99"
         }
 
-        # Variável para a transportadora selecionada
         self.selected_transportadora = tk.StringVar()
         self.selected_transportadora.set(TRANSPORTADORA_PADRAO)
         self.selected_transportadora.trace('w', self.update_treeview_on_selection)
 
-        # Configuração do estilo para o Combobox
         self.style = ttk.Style()
         self.style.configure('TCombobox', font=("Helvetica", 12))
 
-        # Criar a interface baseada no papel do usuário
         if self.current_user['role'] == 'admin' and override_role is None:
             self.create_admin_menu()
         else:
             self.create_user_interface()
 
-        # Fechar conexão com o banco de dados ao fechar a janela
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def configure_main_window(self):
         """
         Configurações iniciais da janela principal.
         """
-        # Definir o tamanho da janela para 80% da resolução do monitor
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
         window_width = int(screen_width * 0.8)
@@ -80,23 +69,18 @@ class PackageCounterApp:
         """
         Cria o menu administrativo com opções de gerenciamento de usuários e verificação de pedidos.
         """
-        # Limpar a janela
         for widget in self.root.winfo_children():
             widget.destroy()
 
-        # Frame principal
         main_frame = tk.Frame(self.root)
         main_frame.pack(expand=True)
 
-        # Nome da empresa (logo)
         logo_label = tk.Label(main_frame, text="Ponto 3D", font=("Helvetica", 24, "bold"))
         logo_label.pack(pady=10)
 
-        # Título do menu admin
         header_label = tk.Label(main_frame, text="Menu do Administrador", font=("Helvetica", 18, "bold"))
         header_label.pack(pady=10)
 
-        # Botão para gerenciar usuários
         button_font = ("Helvetica", 14)
         manage_users_button = tk.Button(
             main_frame,
@@ -107,11 +91,9 @@ class PackageCounterApp:
         )
         manage_users_button.pack(pady=10)
 
-        # Frame para verificar pedido e ajuda
         verify_frame = tk.Frame(main_frame)
         verify_frame.pack(pady=10)
 
-        # Botão para verificar pedido
         verify_package_button = tk.Button(
             verify_frame,
             text="Verificar Pedido",
@@ -121,7 +103,6 @@ class PackageCounterApp:
         )
         verify_package_button.grid(row=0, column=0, padx=5)
 
-        # Botão de ajuda único que depende do tipo de banco de dados
         help_button = tk.Button(
             verify_frame,
             text="?",
@@ -130,7 +111,6 @@ class PackageCounterApp:
         )
         help_button.grid(row=0, column=1, padx=5)
 
-        # Botão para acessar o menu de bipagem de testes
         test_scanning_button = tk.Button(
             main_frame,
             text="Menu de Bipagem de Testes",
@@ -144,7 +124,6 @@ class PackageCounterApp:
         """
         Cria a interface de usuário para operações normais (não-admin).
         """
-        # Limpar a janela
         for widget in self.root.winfo_children():
             widget.destroy()
 
@@ -155,11 +134,10 @@ class PackageCounterApp:
         """
         Cria os widgets principais da interface de usuário.
         """
-        # Frame principal
         main_frame = tk.Frame(self.root, bg="#f0f0f0")
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-        # Nome da empresa no topo
+        # Título ou logo
         company_label = tk.Label(
             main_frame,
             text="Ponto 3D",
@@ -168,11 +146,10 @@ class PackageCounterApp:
         )
         company_label.pack(pady=10)
 
-        # Frame superior para seleção de transportadora e entrada de código de barras
+        # Frame superior para transportadora e código
         top_frame = tk.Frame(main_frame, bg="#f0f0f0")
         top_frame.pack(fill=tk.X, pady=10)
 
-        # Label e Combobox para seleção de transportadora
         transportadora_label = tk.Label(
             top_frame,
             text="Transportadora:",
@@ -193,7 +170,6 @@ class PackageCounterApp:
         self.transportadora_menu.bind("<Tab>", lambda e: self.package_entry.focus_set())
         self.transportadora_menu.bind("<Return>", lambda e: self.package_entry.focus_set())
 
-        # Botão de ajuda para transportadora
         help_transportadora = tk.Button(
             top_frame,
             text="?",
@@ -202,7 +178,6 @@ class PackageCounterApp:
         )
         help_transportadora.grid(row=0, column=2, padx=5)
 
-        # Label e Entry para entrada do código de barras
         package_label = tk.Label(
             top_frame,
             text="Bipe o código de barras:",
@@ -219,9 +194,8 @@ class PackageCounterApp:
         self.package_entry.grid(row=1, column=1, padx=10, pady=10)
         self.package_entry.bind('<Return>', self.add_package)
         self.package_entry.bind("<Tab>", lambda e: self.export_button.focus_set())
-        self.package_entry.focus_set()  # Focar automaticamente na entrada do código de barras
+        self.package_entry.focus_set()
 
-        # Botão de ajuda para código de barras
         help_package = tk.Button(
             top_frame,
             text="?",
@@ -230,47 +204,34 @@ class PackageCounterApp:
         )
         help_package.grid(row=1, column=2, padx=5)
 
-        # Frame do Treeview e Total de Pacotes
+        # Frame do Treeview no meio
         treeview_frame = tk.Frame(main_frame, bg="#f0f0f0")
         treeview_frame.pack(fill=tk.BOTH, expand=True, pady=10)
 
-        # Configuração do Treeview para exibir pacotes
         columns = ("codigo_pacote", "data", "hora", "coleta_number", "id")
         self.package_treeview = ttk.Treeview(treeview_frame, columns=columns, show='headings')
         self.package_treeview.heading('codigo_pacote', text='Código de Pacote')
         self.package_treeview.heading('data', text='Data')
         self.package_treeview.heading('hora', text='Hora')
         self.package_treeview.heading('coleta_number', text='Coleta Número')
-        self.package_treeview.heading('id', text='ID')  # Adiciona o ID
+        self.package_treeview.heading('id', text='ID')
 
-        # Configuração das colunas
         self.package_treeview.column('codigo_pacote', width=150)
         self.package_treeview.column('data', width=100)
         self.package_treeview.column('hora', width=100)
         self.package_treeview.column('coleta_number', width=100)
-        self.package_treeview.column('id', width=50, anchor='center')  # Centraliza o ID
+        self.package_treeview.column('id', width=50, anchor='center')
 
         self.package_treeview.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # Scrollbar para o Treeview
         scrollbar = ttk.Scrollbar(treeview_frame, orient=tk.VERTICAL, command=self.package_treeview.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.package_treeview.configure(yscroll=scrollbar.set)
 
-        # Label para exibir o total de pacotes
-        self.total_label = tk.Label(
-            main_frame,
-            text="",
-            font=("Helvetica", 14, "bold"),
-            bg="#f0f0f0"
-        )
-        self.total_label.pack(pady=10)
-
-        # Frame para os botões de ação
+        # Frame inferior para botões em grid
         button_frame = tk.Frame(main_frame, bg="#f0f0f0")
         button_frame.pack(fill=tk.X, pady=20)
 
-        # Botão para exportar a coleta
         self.export_button = tk.Button(
             button_frame,
             text="Exportar Coleta",
@@ -281,10 +242,7 @@ class PackageCounterApp:
             width=20
         )
         self.export_button.grid(row=0, column=0, padx=10, pady=10)
-        self.export_button.bind("<Tab>", lambda e: self.close_collection_button.focus_set())
-        self.export_button.bind("<Return>", lambda e: self.export_list())
 
-        # Botão para fechar a coleta
         self.close_collection_button = tk.Button(
             button_frame,
             text="Fechar Coleta",
@@ -295,10 +253,7 @@ class PackageCounterApp:
             width=20
         )
         self.close_collection_button.grid(row=0, column=1, padx=10, pady=10)
-        self.close_collection_button.bind("<Tab>", lambda e: self.total_button.focus_set())
-        self.close_collection_button.bind("<Return>", lambda e: self.close_collection())
 
-        # Botão para consultar coletas anteriores
         self.total_button = tk.Button(
             button_frame,
             text="Consultar Coletas Anteriores",
@@ -309,24 +264,7 @@ class PackageCounterApp:
             width=25
         )
         self.total_button.grid(row=0, column=2, padx=10, pady=10)
-        self.total_button.bind("<Tab>", lambda e: self.reopen_collection_button.focus_set())
-        self.total_button.bind("<Return>", lambda e: self.view_total_packages())
 
-        # Botão para reabrir uma coleta
-        self.reopen_collection_button = tk.Button(
-            button_frame,
-            text="Reabrir Coleta",
-            command=self.reopen_collection,
-            font=("Helvetica", 12),
-            bg="#8B4513",
-            fg="white",
-            width=20
-        )
-        self.reopen_collection_button.grid(row=1, column=1, padx=10, pady=10)
-        self.reopen_collection_button.bind("<Tab>", lambda e: self.remove_button.focus_set())
-        self.reopen_collection_button.bind("<Return>", lambda e: self.reopen_collection())
-
-        # Botão para remover um pacote
         self.remove_button = tk.Button(
             button_frame,
             text="Remover",
@@ -337,10 +275,18 @@ class PackageCounterApp:
             width=15
         )
         self.remove_button.grid(row=1, column=0, padx=10, pady=10)
-        self.remove_button.bind("<Tab>", lambda e: self.package_entry.focus_set())
-        self.remove_button.bind("<Return>", lambda e: self.remove_package())
 
-        # Botão para verificar pedido
+        self.reopen_collection_button = tk.Button(
+            button_frame,
+            text="Reabrir Coleta",
+            command=self.reopen_collection,
+            font=("Helvetica", 12),
+            bg="#8B4513",
+            fg="white",
+            width=20
+        )
+        self.reopen_collection_button.grid(row=1, column=1, padx=10, pady=10)
+
         self.verify_button = tk.Button(
             button_frame,
             text="Verificar Pedido",
@@ -351,10 +297,7 @@ class PackageCounterApp:
             width=20
         )
         self.verify_button.grid(row=1, column=2, padx=10, pady=10)
-        self.verify_button.bind("<Tab>", lambda e: self.export_button.focus_set())
-        self.verify_button.bind("<Return>", lambda e: self.open_verify_package())
 
-        # Botão de ajuda para verificar pedidos no usuário
         help_verify_user = tk.Button(
             button_frame,
             text="?",
@@ -363,8 +306,35 @@ class PackageCounterApp:
         )
         help_verify_user.grid(row=1, column=3, padx=5)
 
-        # Bind para a tecla Enter na entrada do pacote
-        self.package_entry.bind('<Return>', self.add_package)
+        # NOVO: frame à direita (coluna 4) para a frase e total
+        right_info_frame = tk.Frame(button_frame, bg="#f0f0f0")
+        # rowspan=2 faz ocupar as duas linhas de botões
+        right_info_frame.grid(row=0, column=4, rowspan=2, sticky="nsew", padx=(40, 0))
+
+        self.total_text_label = tk.Label(
+            right_info_frame,
+            text="TOTAL DE PEDIDOS BIPADOS",
+            font=("Helvetica", 18, "bold"),
+            bg="#f0f0f0"
+        )
+        self.total_text_label.pack(anchor="center", pady=(0, 10))
+
+        self.big_total_label = tk.Label(
+            right_info_frame,
+            text="0",
+            font=("Helvetica", 72, "bold"),
+            fg="#333333",
+            bg="#f0f0f0"
+        )
+        self.big_total_label.pack(anchor="center")
+
+        self.transportadora_label_big = tk.Label(
+            right_info_frame,
+            text="",  # Ex: (SHEIN)
+            font=("Helvetica", 18),
+            bg="#f0f0f0"
+        )
+        self.transportadora_label_big.pack(anchor="center", pady=(10, 0))
 
     def show_verify_help(self):
         """
@@ -463,11 +433,12 @@ class PackageCounterApp:
                 return
 
             self.save_package(transportadora, package_code)
+            play_sound('success')
+
             self.update_treeview()
             self.package_entry.delete(0, tk.END)
             self.package_entry.focus_set()
 
-            # Selecionar a última linha adicionada
             children = self.package_treeview.get_children()
             if children:
                 last_item = children[-1]
@@ -487,21 +458,21 @@ class PackageCounterApp:
             hora_atual = datetime.datetime.now().strftime("%H:%M:%S")
             status = STATUS_PENDING
 
-            # Determinar o próximo número de coleta
             self.cursor.execute("""
                 SELECT MAX(coleta_number) FROM packages 
                 WHERE transportadora = ? AND data = ? AND status = ?
             """, (transportadora, data_atual, STATUS_COLLECTED))
             result = self.cursor.fetchone()
-            max_collected_coleta_number = result[0] if result[0] is not None else 0
-
+            max_collected_coleta_number = result[0] if result and result[0] else 0
             coleta_number = max_collected_coleta_number + 1
 
-            # Inserir o pacote no banco de dados
+            # Registrar quem bipou
+            bipped_by = self.current_user['username']
+
             self.cursor.execute("""
-                INSERT INTO packages (transportadora, codigo_pacote, data, hora, status, coleta_number) 
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (transportadora, codigo_pacote, data_atual, hora_atual, status, coleta_number))
+                INSERT INTO packages (transportadora, codigo_pacote, data, hora, status, coleta_number, bipped_by) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (transportadora, codigo_pacote, data_atual, hora_atual, status, coleta_number, bipped_by))
             self.conn.commit()
         except Exception as e:
             logging.error("Erro ao salvar pacote: %s", e)
@@ -520,8 +491,6 @@ class PackageCounterApp:
         if confirmation:
             try:
                 data_atual = datetime.date.today().isoformat()
-
-                # Verificar se há pacotes pendentes
                 self.cursor.execute("""
                     SELECT coleta_number FROM packages
                     WHERE transportadora = ? AND data = ? AND status = ?
@@ -534,16 +503,15 @@ class PackageCounterApp:
                     messagebox.showwarning("Aviso", "Não há pacotes pendentes para fechar.")
                     return
 
-                # Atualizar o status dos pacotes
                 self.cursor.execute("""
                     UPDATE packages 
                     SET status = ? 
                     WHERE transportadora = ? AND data = ? AND status = ? AND coleta_number = ?
                 """, (STATUS_COLLECTED, transportadora, data_atual, STATUS_PENDING, coleta_number))
-                
+
                 rows_updated = self.cursor.rowcount
                 self.conn.commit()
-                
+
                 if rows_updated > 0:
                     messagebox.showinfo("Sucesso", f"Coleta {coleta_number} fechada com sucesso.\nPacotes atualizados: {rows_updated}")
                 else:
@@ -567,8 +535,6 @@ class PackageCounterApp:
         if confirmation:
             try:
                 data_atual = datetime.date.today().isoformat()
-
-                # Obter o último número de coleta fechada
                 self.cursor.execute("""
                     SELECT MAX(coleta_number) FROM packages
                     WHERE transportadora = ? AND data = ? AND status = ?
@@ -580,7 +546,6 @@ class PackageCounterApp:
                     messagebox.showwarning("Aviso", "Não há coletas fechadas para reabrir.")
                     return
 
-                # Atualizar o status dos pacotes
                 self.cursor.execute("""
                     UPDATE packages 
                     SET status = ? 
@@ -609,13 +574,13 @@ class PackageCounterApp:
         """
         Atualiza o Treeview com os pacotes registrados para a transportadora selecionada no dia atual.
         """
-        # Limpar o Treeview
         for item in self.package_treeview.get_children():
             self.package_treeview.delete(item)
 
         selected_transportadora = self.selected_transportadora.get()
         if selected_transportadora == TRANSPORTADORA_PADRAO:
-            self.total_label.config(text="Total de pacotes bipados hoje:\nNenhuma transportadora selecionada.")
+            self.big_total_label.config(text="0")
+            self.transportadora_label_big.config(text="")
             return
 
         try:
@@ -629,20 +594,19 @@ class PackageCounterApp:
             for pacote in packages:
                 self.package_treeview.insert('', 'end', values=(pacote[0], pacote[1], pacote[2], pacote[3], pacote[4]))
 
-            # Aplicar a coloração às linhas dos pacotes com base na transportadora
+            # Colorir pela transportadora
             for item in self.package_treeview.get_children():
                 self.package_treeview.item(item, tags=(selected_transportadora,))
             self.package_treeview.tag_configure(selected_transportadora, background=self.transportadora_colors.get(selected_transportadora, 'white'))
 
-            # Atualizar o total de pacotes
             self.cursor.execute("""
                 SELECT COUNT(*) 
                 FROM packages 
                 WHERE data = ? AND transportadora = ? AND status = ?
             """, (data_atual, selected_transportadora, STATUS_PENDING))
             count = self.cursor.fetchone()[0]
-            total_text = f"Total de pacotes bipados hoje para {selected_transportadora}: {count}"
-            self.total_label.config(text=total_text)
+            self.big_total_label.config(text=str(count))
+            self.transportadora_label_big.config(text=f"({selected_transportadora})")
         except Exception as e:
             logging.error("Erro ao atualizar a lista: %s", e)
             messagebox.showerror("Erro", f"Ocorreu um erro ao atualizar a lista: {str(e)}")
@@ -678,7 +642,7 @@ class PackageCounterApp:
         codigo_pacote = str(item['values'][0])
         transportadora = self.selected_transportadora.get()
         coleta_number = item['values'][3]
-        package_id = item['values'][4]  # ID do pacote
+        package_id = item['values'][4]
 
         try:
             data_atual = datetime.date.today().isoformat()
@@ -730,10 +694,9 @@ class PackageCounterApp:
         test_window.grab_set()
         test_window.title("Contador de Pacotes - Ponto 3D - Teste")
 
-        # Definir o tamanho da janela para 800x600 ou a resolução disponível
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        desired_width = 800  # Reduzir o tamanho para evitar problemas em telas menores
+        desired_width = 800
         desired_height = 600
 
         if screen_width >= desired_width and screen_height >= desired_height:
@@ -748,7 +711,6 @@ class PackageCounterApp:
         test_window.geometry(f'{window_width}x{window_height}+{x}+{y}')
         test_window.state('normal')
 
-        # Conectar ao banco de dados de teste
         try:
             test_conn, test_cursor = get_database_connection(test=True)
         except Exception as e:
@@ -757,17 +719,15 @@ class PackageCounterApp:
             test_window.destroy()
             return
 
-        # Criar uma nova instância da aplicação para o modo de teste
         test_app = PackageCounterApp(
             test_window,
             self.current_user.copy(),
             conn=test_conn,
             title="Contador de Pacotes - Ponto 3D - Teste",
             override_role='user',
-            db_type='test'  # Define o tipo de DB para 'test'
+            db_type='test'
         )
 
-        # Função para fechar a janela de teste e a conexão
         def on_closing_test():
             try:
                 test_conn.close()

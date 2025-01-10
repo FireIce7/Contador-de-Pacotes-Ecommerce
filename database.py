@@ -1,5 +1,3 @@
-# database.py
-
 import sqlite3
 from config import DB_PATH, TEST_DB_PATH, DEFAULT_ADMIN_USERNAME, DEFAULT_ADMIN_PASSWORD, DEFAULT_ROLE, logging
 import bcrypt
@@ -39,6 +37,12 @@ def initialize_database(conn, cursor):
                 coleta_number INTEGER NOT NULL
             )
         ''')
+
+        # NOVO: adicionar coluna bipped_by se não existir
+        try:
+            cursor.execute('ALTER TABLE packages ADD COLUMN bipped_by TEXT')
+        except:
+            pass
 
         # Verifica se há usuários no banco
         cursor.execute("SELECT COUNT(*) FROM users")

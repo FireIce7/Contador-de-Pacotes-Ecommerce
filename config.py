@@ -1,5 +1,3 @@
-# config.py
-
 import os
 import sys
 import re
@@ -9,7 +7,6 @@ import logging
 if getattr(sys, 'frozen', False):
     # Executando como um executável PyInstaller
     BASE_DIR = os.path.dirname(sys.executable)
-    # Caminho para recursos incluídos no executável
     RESOURCE_PATH = sys._MEIPASS
 else:
     # Executando como script Python
@@ -31,6 +28,9 @@ TEST_DB_PATH = os.path.join(DB_DIR, 'packagestest.db')  # Banco de dados para te
 
 # Caminho para o arquivo de áudio personalizado
 ALERT_SOUND_PATH = os.path.join(RESOURCE_PATH, 'sounds', 'alert.wav')
+
+# NOVO: caminho para som de bipagem correta
+CORRECT_SOUND_PATH = os.path.join(RESOURCE_PATH, 'sounds', 'correct.wav')
 
 # Caminho para o arquivo de log
 LOG_PATH = os.path.join(LOG_DIR, 'app.log')
