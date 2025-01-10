@@ -147,11 +147,15 @@ Contador_Pacotes/
 │   ├── user_management.py     # Tela para gerenciamento de usuários (adicionar, editar, remover).
 │   ├── verify_package.py      # Tela para verificar pedidos registrados com detalhes.
 │   └── view_total_packages.py # Tela para consultar coletas anteriores com filtros avançados.
+├── sounds/
+│   ├── alert.wav              # Som emitido ao bipar um pedido duplicado ou quando há algum erro.
+│   └── correct.wav            # Som emitido ao bipar um pedido corretamente. 
 ├── main.py                    # Ponto de entrada da aplicação.
 ├── utils.py                   # Funções utilitárias para sons, validação de códigos e centralização de janelas.
 ├── config.py                  # Configurações globais do projeto, como constantes e diretórios.
 ├── requirements.txt           # Lista de bibliotecas necessárias para a execução.
-└── database.py                # Inicialização e conexão com o banco de dados SQLite.
+├── database.py                # Inicialização e conexão com o banco de dados SQLite.
+└── requirements.txt           # Bibliotecas necessárias do programa.
 ```
 
 ---
